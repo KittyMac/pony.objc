@@ -1,7 +1,30 @@
 all:
-	stable env /Volumes/Development/Development/pony/ponyc/build/release/ponyc -o ./build/ ./objc
-	time ./build/objc
+	corral run -- ponyc -o ./build/ ./objc
+	./build/objc
 
 test:
-	stable env /Volumes/Development/Development/pony/ponyc/build/release/ponyc -V=0 -o ./build/ ./objc
+	corral run -- ponyc -V=0 -o ./build/ ./objc
 	./build/objc
+
+
+
+
+corral-fetch:
+	@corral clean -q
+	@corral fetch -q
+
+corral-local:
+	-@rm corral.json
+	-@rm lock.json
+	@corral init -q
+	#@corral add /Volumes/Development/Development/pony/pony.stringExt -q
+
+corral-git:
+	-@rm corral.json
+	-@rm lock.json
+	@corral init -q
+	#@corral add github.com/KittyMac/pony.stringExt.git -q
+
+ci: corral-git corral-fetch all
+	
+dev: corral-local corral-fetch all
