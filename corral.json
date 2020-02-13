@@ -1,4 +1,8 @@
 {
-  "deps": [],
+  "deps": [
+    {
+      "locator": "/Volumes/Development/Development/pony/pony.stringExt"
+    }
+  ],
   "info": {}
 }
