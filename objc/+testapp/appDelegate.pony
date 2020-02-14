@@ -1,11 +1,7 @@
-use @UIApplicationMain[U32](argc:U32, argv:Pointer[None], principalClassName:Pointer[None], delegateClassName:Pointer[None]) if ios
-use @NSApplicationMain[I32](argc:U32, argv:Pointer[None]) if osx
-
+use @NSApplicationMain[I32](argc:U32, argv:Pointer[None])
 
 actor AppDelegate
   fun _use_main_thread():Bool => true
-  
-  
   
   new create(env:Env) =>
     
@@ -50,20 +46,14 @@ actor AppDelegate
       })?
       appDelegateClass.endImplementation()?
     
-      ifdef osx then
     
-        // Create an application delegate and add it to the sharedApplication
-        let appDelegate = ObjC("AppDelegate")?("alloc")?("init")?
-                
-        ObjC("NSApplication")?("sharedApplication")?("setDelegate:", [ appDelegate.id.usize() ] )?
-      
-        @NSApplicationMain(env.argc, env.argv)
-      end
+      // Create an application delegate and add it to the sharedApplication
+      let appDelegate = ObjC("AppDelegate")?("alloc")?("init")?
+              
+      ObjC("NSApplication")?("sharedApplication")?("setDelegate:", [ appDelegate.id.usize() ] )?
+    
+      @NSApplicationMain(env.argc, env.argv)
 
-      ifdef ios then
-        var null:Pointer[None] = Pointer[None]
-        @UIApplicationMain(env.argc, env.argv, null, null)
-      end
     else
       @printf[I32]("FATAL ERROR: \n".cstring(), __error_loc)
   		@exit[None](I32(99))
