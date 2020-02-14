@@ -9,6 +9,12 @@ actor AppDelegate
   
   new create(env:Env) =>
     ifdef osx then
+    
+      // we want to be like:
+      //[[NSApplication sharedApplication] setDelegate:[[AppDelegate alloc] init]];
+      // that could break down to
+      //ObjC.c("NSApplication").("sharedApplication").("setDelegate", ObjC.c("AppDelegate").("alloc").("init"))
+      
       @NSApplicationMain(env.argc, env.argv)
     end
 

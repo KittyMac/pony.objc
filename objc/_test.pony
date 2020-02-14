@@ -5,15 +5,23 @@ use "stringext"
 
 use "ponytest"
 
-actor Main is TestList
+actor Main
+  new create(env:Env) =>
+    MainThreadTests(env)
+
+
+actor MainThreadTests is TestList
   let env:Env
   
+  fun _use_main_thread():Bool => true
+    
 	new create(env': Env) =>
     env = env'
     PonyTest(env, this)
 
 	fun tag tests(test: PonyTest) =>
     test(_TestObjC1)
+    test(_TestObjC2)
   
   be testsFinished(test: PonyTest, success:Bool) =>
     if success then
@@ -38,6 +46,7 @@ actor Main is TestList
 
 class iso _TestObjC1 is UnitTest
 	fun name(): String => "print hello world using NSLog"
+  fun exclusion_group(): String => "sequential"
 
 	fun apply(h: TestHelper) =>
 		try			
@@ -48,3 +57,22 @@ class iso _TestObjC1 is UnitTest
 			h.complete(false)
 		end
 
+  class iso _TestObjC2 is UnitTest
+  	fun name(): String => "[NSNumber numberWithInt:75]; [NSNumber numberWithFloat:0.75];"
+    fun exclusion_group(): String => "sequential"
+
+  	fun apply(h: TestHelper) =>
+  		try			
+        let n0 = ObjC("NSNumber")?("numberWithInt:", [ USize(25) ] )?
+        @NSLog[None](n0("description")?.id)
+        let n1 = n0.callInt("intValue")?
+        
+        let m0 = ObjC("NSNumber")?("numberWithFloat:", [ F32(0.25) ] )?
+        @NSLog[None](m0("description")?.id)
+        
+        let m1 = m0.callFloat("floatValue")?
+                
+  			h.complete( (n1 == 25) and (m1 == 0.25) )
+  		else
+  			h.complete(false)
+  		end
