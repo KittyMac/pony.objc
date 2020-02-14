@@ -4,6 +4,11 @@ use @sel_registerName[SelectorPtr](name:ObjectPtr)
 
 use @objc_getClass[ClassPtr](class_name:ObjectPtr)
 
+use @objc_allocateClassPair[ClassPtr](superclass:ClassPtr, name:ObjectPtr, extraBytes:USize)
+use @objc_lookUpClass[ClassPtr](name:ObjectPtr)
+use @objc_registerClassPair[None](cls:ClassPtr)
+
+
 type ObjectPtr is Pointer[None] tag
 type ClassPtr is Pointer[None] tag
 type SelectorPtr is Pointer[None] tag
@@ -15,12 +20,31 @@ interface CPointer
 	fun cpointer(offset: USize = 0): Pointer[U8] tag
 	fun size(): USize
 
+
+
 class ObjC
   var id:ObjectPtr = ObjectPtr
   
   new ref create() =>
     None
-    
+  
+  new ref beginImplementation(name:String, superclass:String = "NSObject")? =>
+    """
+    For registering all new classes with the ObjC runtime.
+    To create a new class, start by calling objc_allocateClassPair. Then set the class's 
+    attributes with functions like class_addMethod and class_addIvar. When you are done 
+    building the class, call objc_registerClassPair. The new class is now ready for use.
+    """
+    id = @objc_allocateClassPair(@objc_lookUpClass(superclass.cstring()), name.cstring(), 0)
+		if id.is_null() then error end
+  
+  fun ref endImplementation():ObjC? =>
+    if false then error end
+    @objc_registerClassPair(id)
+		this
+  
+  
+  
   fun ref apply(name:String, args:Array[Args]=[]):ObjC? =>
     // if id is null, then we're asking for a class
     if id.is_null() then
@@ -84,43 +108,3 @@ class ObjC
       @objc_msgSend_fpret[F32](id, sel(name)?)
     end
   
-    /*
-  fun ref call1(name:String, arg1:(I32|F32)):ObjC? =>  
-    let res = ObjC
-    res.id = @objc_msgSend[ObjectPtr](id, sel(name)?, arg1.i32())
-    res
-*/
-  /*
-primitive ObjC
-  
-  fun c(name:String):ClassPtr? =>
-  	let ptr:ClassPtr = @objc_getClass(name.cstring())
-  	if ptr.is_null() then error end
-  	ptr
-  
-	fun apply(obj:ObjectPtr, op:SelectorPtr):ObjectPtr =>
-		@objc_msgSend[ObjectPtr](obj, op)
-  
-  
-  
-	fun getClass(name:String):ClassPtr? =>
-		let ptr:ClassPtr = @objc_getClass(name.cstring())
-		if ptr.is_null() then error end
-		ptr
-	
-	fun newClass(name:String):ObjectPtr? =>
-		let nsClass = ObjC.getClass("NSString")?
-		let nsObject = @class_createInstance(nsClass, 0)
-		if nsObject.is_null() then error end
-		nsObject
-	
-	fun selector(name:String):SelectorPtr =>
-		@sel_registerName(name.cstring())
-	
-	fun performSelector0(obj:ObjectPtr, op:SelectorPtr):ObjectPtr =>
-		@objc_msgSend[ObjectPtr](obj, op)
-	
-	fun performSelector1(obj:ObjectPtr, op:SelectorPtr, arg1:CPointer box):ObjectPtr =>
-		@objc_msgSend[ObjectPtr](obj, op, arg1.cpointer())
-	
-	*/

@@ -22,6 +22,7 @@ actor MainThreadTests is TestList
 	fun tag tests(test: PonyTest) =>
     test(_TestObjC1)
     test(_TestObjC2)
+    test(_TestObjC3)
   
   be testsFinished(test: PonyTest, success:Bool) =>
     if success then
@@ -57,22 +58,41 @@ class iso _TestObjC1 is UnitTest
 			h.complete(false)
 		end
 
-  class iso _TestObjC2 is UnitTest
-  	fun name(): String => "[NSNumber numberWithInt:75]; [NSNumber numberWithFloat:0.75];"
-    fun exclusion_group(): String => "sequential"
+class iso _TestObjC2 is UnitTest
+	fun name(): String => "[NSNumber numberWithInt:75]; [NSNumber numberWithFloat:0.75];"
+  fun exclusion_group(): String => "sequential"
 
-  	fun apply(h: TestHelper) =>
-  		try			
-        let n0 = ObjC("NSNumber")?("numberWithInt:", [ USize(25) ] )?
-        @NSLog[None](n0("description")?.id)
-        let n1 = n0.callInt("intValue")?
-        
-        let m0 = ObjC("NSNumber")?("numberWithFloat:", [ F32(0.25) ] )?
-        @NSLog[None](m0("description")?.id)
-        
-        let m1 = m0.callFloat("floatValue")?
-                
-  			h.complete( (n1 == 25) and (m1 == 0.25) )
-  		else
-  			h.complete(false)
-  		end
+	fun apply(h: TestHelper) =>
+		try			
+      let n0 = ObjC("NSNumber")?("numberWithInt:", [ USize(25) ] )?
+      @NSLog[None](n0("description")?.id)
+      let n1 = n0.callInt("intValue")?
+      
+      let m0 = ObjC("NSNumber")?("numberWithFloat:", [ F32(0.25) ] )?
+      @NSLog[None](m0("description")?.id)
+      
+      let m1 = m0.callFloat("floatValue")?
+              
+			h.complete( (n1 == 25) and (m1 == 0.25) )
+		else
+			h.complete(false)
+		end
+
+class iso _TestObjC3 is UnitTest
+	fun name(): String => "Define a new class, create instance of class, call method on the class"
+  fun exclusion_group(): String => "sequential"
+
+	fun apply(h: TestHelper) =>
+		try			
+      
+      ObjC.beginImplementation("AppDelegate")?.endImplementation()?
+      
+      let d = ObjC("AppDelegate")?("alloc")?("init")?
+      
+      @NSLog[None](d("description")?.id)
+      
+      
+			h.complete(true)
+		else
+			h.complete(false)
+		end
