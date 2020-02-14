@@ -7,11 +7,13 @@ use @objc_getClass[ClassPtr](class_name:ObjectPtr)
 use @objc_allocateClassPair[ClassPtr](superclass:ClassPtr, name:ObjectPtr, extraBytes:USize)
 use @objc_lookUpClass[ClassPtr](name:ObjectPtr)
 use @objc_registerClassPair[None](cls:ClassPtr)
+use @class_addMethod[Bool](cls:ClassPtr, name:ObjectPtr, imp:BareFunc, types:ObjectPtr)
 
 
 type ObjectPtr is Pointer[None] tag
 type ClassPtr is Pointer[None] tag
 type SelectorPtr is Pointer[None] tag
+type BareFunc is Pointer[None] tag
 
 type IntArgs is (ISize|USize|U32|I32)
 type Args is (ISize|USize|U32|I32|F32)
@@ -38,10 +40,17 @@ class ObjC
     id = @objc_allocateClassPair(@objc_lookUpClass(superclass.cstring()), name.cstring(), 0)
 		if id.is_null() then error end
   
+  fun ref addMethod(name:String, types:String, imp:BareFunc)? =>
+    // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjCRuntimeGuide/Articles/ocrtTypeEncodings.html#//apple_ref/doc/uid/TP40008048-CH100
+    // For the types argument, it is a string which describes the method's signature
+    if @class_addMethod(id, sel(name)?, imp, types.cstring()) == false then error end
+  
   fun ref endImplementation():ObjC? =>
     if false then error end
     @objc_registerClassPair(id)
 		this
+  
+  
   
   
   

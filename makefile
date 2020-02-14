@@ -2,11 +2,11 @@ builddir=./build/
 
 all:
 	corral run -- ponyc -o ${builddir} ./objc
-	cd ${builddir}; ./objc
+	./${builddir}/objc
 
 test:
 	corral run -- ponyc -V=0 -o ${builddir} ./objc
-	cd ${builddir}; ./objc
+	./${builddir}/objc
 
 
 

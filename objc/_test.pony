@@ -85,12 +85,21 @@ class iso _TestObjC3 is UnitTest
 	fun apply(h: TestHelper) =>
 		try			
       
-      ObjC.beginImplementation("AppDelegate")?.endImplementation()?
+      // Define a new class TestClass
+      let appDelegateClass = ObjC.beginImplementation("TestClass")?
       
-      let d = ObjC("AppDelegate")?("alloc")?("init")?
+      // which has a - (void) print() method
+      appDelegateClass.addMethod("print", "v@:", @{(self:ObjectPtr, _cmd:ObjectPtr) => 
+        @fprintf[I32](@pony_os_stdout[Pointer[U8]](), "print method was called successfully\n".cstring())
+      })?
       
-      @NSLog[None](d("description")?.id)
+      // End class definitions
+      appDelegateClass.endImplementation()?
       
+      // alloc' init' and call the print() method
+      let d = ObjC("TestClass")?("alloc")?("init")?
+      
+      d("print")?.id
       
 			h.complete(true)
 		else
