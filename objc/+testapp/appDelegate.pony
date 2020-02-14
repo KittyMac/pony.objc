@@ -12,10 +12,7 @@ actor AppDelegate
     try
       // Create an app delegate class
       let appDelegateClass = ObjC.beginImplementation("AppDelegate")?
-      appDelegateClass.addMethod("applicationDidFinishLaunching:", "v@:@", @{(self:ObjectPtr, _cmd:ObjectPtr, notification:ObjectPtr)? => 
-        @fprintf[I32](@pony_os_stdout[Pointer[U8]](), "application did finish launching\n".cstring())
-        
-        
+      appDelegateClass.addMethod("applicationDidFinishLaunching:", "v@:@", @{(self:ObjectPtr, _cmd:ObjectPtr, notification:ObjectPtr)? =>         
         // NSWindow * window = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 300, 300)
         //                                            styleMask:(NSWindowStyleMaskResizable | NSWindowStyleMaskMiniaturizable | NSWindowStyleMaskClosable | NSWindowStyleMaskTitled)
         //                                              backing:NSBackingStoreBuffered
@@ -32,7 +29,7 @@ actor AppDelegate
         invocation("setTarget:", [ window.id.usize() ] )?
         invocation("setSelector:", [ windowInitSel.usize() ] )?
         
-        var rect = CGRect(0,0,500,400)
+        var rect = CGRect(0,0,1024,768)
         var style = USize(0xF)
         var backing = USize(2)
         var defer = false
@@ -41,18 +38,15 @@ actor AppDelegate
         @objc_msgSend[USize](invocation.id, invocation.sel("setArgument:atIndex:")?, addressof backing, USize(4))?
         @objc_msgSend[USize](invocation.id, invocation.sel("setArgument:atIndex:")?, addressof defer,   USize(5))?
         
-        @fprintf[I32](@pony_os_stdout[Pointer[U8]](), "invoke\n".cstring())
         @objc_msgSend[USize](invocation.id, invocation.sel("invoke")?)?
         
-        @fprintf[I32](@pony_os_stdout[Pointer[U8]](), "description\n".cstring())
-        @NSLog[None](window("description")?.id)
-        
-        @fprintf[I32](@pony_os_stdout[Pointer[U8]](), "makeKeyAndOrderFront:\n".cstring())
         window("makeKeyAndOrderFront:", [ window.id.usize() ])?
+        
+        window("center")?
         
       })?
       appDelegateClass.addMethod("applicationWillTerminate:", "v@:@", @{(self:ObjectPtr, _cmd:ObjectPtr, notification:ObjectPtr) => 
-        @fprintf[I32](@pony_os_stdout[Pointer[U8]](), "application will terminate\n".cstring())
+        None
       })?
       appDelegateClass.endImplementation()?
     
